@@ -32,53 +32,11 @@ def draw_grid(currentCells):
             if currentCells[i1][j1] == '#':
                 pygame.draw.rect(screen , aliveCol , (i , j , CELL_SIZE , CELL_SIZE))
                 # pass
-                
-# Initialize pygame and create window
-pygame.init()
-pygame.mixer.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Game of Life")
-clock = pygame.time.Clock()
 
-# Create a list of list for the cells:
-nextCells = []
-
-for x in range(width):
-    temp = []
-    for i in range(PERCENT*(height//100)):
-        var = random.choice(range(height))
-        if var not in temp:
-            temp.append(var)
-        else:
-            temp.append(var+1 if var!=height-1 and var+1 not in temp else var-1)
-    column = []
-    for y in range(height):
-        if y in temp:
-            column.append('#')
-        else:
-            column.append(' ')
-    nextCells.append(column)
-
-#main loop
-running = True
-while running:
-    # keep loop running at the right speed
-    clock.tick(FPS)
-    # Process input (events)
-    for event in pygame.event.get():
-        # check for closing window
-        if event.type == pygame.QUIT:
-            running = False
-    
-    # time.sleep(0.5)  #Uncomment this line to make simulation slower
-
-    # Draw / render
-    screen.fill(BG_COLOR)
-
+# Run a single step of the Game of Life simulation:
+def update(nextCells):
     currentCells = copy.deepcopy(nextCells)        
     draw_grid(currentCells)
-    time.sleep(1)
-
     # Calculate the next step's cells based on current step's cells:
     for x in range(width):
         for y in range(height):
@@ -113,9 +71,66 @@ while running:
             if currentCells[x][y] == '#' and (numNeighbors == 2 or numNeighbors == 3):
                 # Living cells with 2 or 3 neighbors stay alive:
                 nextCells[x][y] = '#'
+            # elif currentCells[x][y] == '#' and numNeighbors < 2:
+            #     # Living cells with fewer than 2 neighbors die:
+            #     nextCells[x][y] = ' '
+            elif currentCells[x][y] == '#' and numNeighbors >3:
+                # Living cells with more than 3 neighbors die:
+                nextCells[x][y] = ' '
             elif currentCells[x][y] == ' ' and numNeighbors == 3:
                 # Dead cells with 3 neighbors become alive:
                 nextCells[x][y] = '#'
+
+    return nextCells
+
+def fillMat(nextCells):
+    for x in range(width):
+        temp = []
+        for i in range(PERCENT*(height//100)):
+            var = random.choice(range(height))
+            if var not in temp:
+                temp.append(var)
+            else:
+                temp.append(var+1 if var!=height-1 and var+1 not in temp else var-1)
+        column = []
+        for y in range(height):
+            if y in temp:
+                column.append('#')
+            else:
+                column.append(' ')
+        nextCells.append(column)
+    return nextCells
+
+
+# Initialize pygame and create window
+pygame.init()
+pygame.mixer.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Game of Life")
+clock = pygame.time.Clock()
+
+# Create a list of list for the cells:
+nextCells = []
+nextCells = fillMat(nextCells)
+
+#main loop
+running = True
+while running:
+    # keep loop running at the right speed
+    clock.tick(FPS)
+    # Process input (events)
+    for event in pygame.event.get():
+        # check for closing window
+        if event.type == pygame.QUIT:
+            running = False
+    
+    time.sleep(0.5)  #Uncomment this line to make simulation slower
+
+    # Draw / render
+    screen.fill(BG_COLOR)
+
+    # Update
+    nextCells = update(nextCells)
 
     # *after* drawing everything, flip the display
     pygame.display.flip()
