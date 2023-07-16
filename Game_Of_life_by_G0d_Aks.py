@@ -16,7 +16,7 @@ PERCENT = 2
 CELL_SIZE = WIDTH // width
 CELL_COLOR = (1, 1, 1)
 
-#set aliveCol as green
+#set aliveCol as black
 aliveCol = (0, 0, 0)
 
 #Give grid
@@ -26,7 +26,7 @@ def draw_grid(currentCells):
     for y in range(0, HEIGHT, CELL_SIZE):
         pygame.draw.line(screen, CELL_COLOR, (0, y), (WIDTH, y))
     
-        # # Print currentCells on the screen:
+        # Print currentCells on the screen:
     for j , j1 in zip(range(0 , HEIGHT , CELL_SIZE) ,range(height)):
         for i , i1 in zip(range(0 , WIDTH , CELL_SIZE) , range(width)):
             if currentCells[i1][j1] == '#':
