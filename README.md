@@ -1,3 +1,5 @@
-# ConWay_Game_Of_Life_Simulation
+# ConWay's Game Of Life
 
-This is Python implementation of the indigenous Game of Life using Pygame package. Bare skeletal framework of it and is being currently worked on.
+This is a Python implementation of the indigenous Game of Life using the pygame package. It has a bare skeletal framework and is currently being worked on.
+
+![game_screencast](./assets/game_cast.gif)

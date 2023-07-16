@@ -1,23 +1,23 @@
-import pygame , sys , random , time , copy
+import pygame , sys , copy
 
 # Global Variables
-WIDTH = 700
-HEIGHT = 700
-FPS = 60
+WIDTH = 800
+HEIGHT = 800
+FPS = 30
 
-BG_COLOR = (40, 0, 0)
+BG_COLOR = (255, 255, 255)
 
 #variables for game of life
-width = 100
-height = 100
+width = 50
+height = 50
 PERCENT = 2
 
 #grid vars
 CELL_SIZE = WIDTH // width
-CELL_COLOR = (0, 0, 0)
+CELL_COLOR = (1, 1, 1)
 
 #set aliveCol as green
-aliveCol = (50, 255, 0)
+aliveCol = (0, 0, 0)
 
 #Give grid
 def draw_grid(currentCells):
@@ -41,8 +41,6 @@ def update(nextCells):
     for x in range(width):
         for y in range(height):
             # Get neighboring coordinates:
-            # `% width` ensures leftCoord is always between 0 and width - 1
-            # %height also for the same reason
             leftCoord  = (x - 1) % width
             rightCoord = (x + 1) % width
             aboveCoord = (y - 1) % height
@@ -71,9 +69,9 @@ def update(nextCells):
             if currentCells[x][y] == '#' and (numNeighbors == 2 or numNeighbors == 3):
                 # Living cells with 2 or 3 neighbors stay alive:
                 nextCells[x][y] = '#'
-            # elif currentCells[x][y] == '#' and numNeighbors < 2:
-            #     # Living cells with fewer than 2 neighbors die:
-            #     nextCells[x][y] = ' '
+            elif currentCells[x][y] == '#' and numNeighbors < 2:
+                # Living cells with fewer than 2 neighbors die:
+                nextCells[x][y] = ' '
             elif currentCells[x][y] == '#' and numNeighbors >3:
                 # Living cells with more than 3 neighbors die:
                 nextCells[x][y] = ' '
@@ -85,21 +83,23 @@ def update(nextCells):
 
 def fillMat(nextCells):
     for x in range(width):
-        temp = []
-        for i in range(PERCENT*(height//100)):
-            var = random.choice(range(height))
-            if var not in temp:
-                temp.append(var)
-            else:
-                temp.append(var+1 if var!=height-1 and var+1 not in temp else var-1)
         column = []
         for y in range(height):
-            if y in temp:
-                column.append('#')
-            else:
-                column.append(' ')
+            column.append(' ')
         nextCells.append(column)
     return nextCells
+
+def check_button_click(button_rect):
+    mouse_pos = pygame.mouse.get_pos()
+    if button_rect.collidepoint(mouse_pos):
+        return True
+    return False
+
+def get_clicked_cell(pos):
+    x, y = pos
+    cell_x = x // CELL_SIZE
+    cell_y = y // CELL_SIZE
+    return cell_x, cell_y
 
 
 # Initialize pygame and create window
@@ -113,24 +113,45 @@ clock = pygame.time.Clock()
 nextCells = []
 nextCells = fillMat(nextCells)
 
-#main loop
+# Flag to check if the simulation has started
+simulation_started = False
+
+# Flag to check if cells can be clicked
+can_click_cells = True
+# Main loop
 running = True
 while running:
-    # keep loop running at the right speed
     clock.tick(FPS)
+
     # Process input (events)
     for event in pygame.event.get():
-        # check for closing window
+        # Check for closing window
         if event.type == pygame.QUIT:
             running = False
-    
-    time.sleep(0.5)  #Uncomment this line to make simulation slower
+
+        # Check for mouse click events
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if not simulation_started and can_click_cells:
+                cell_x, cell_y = get_clicked_cell(pygame.mouse.get_pos())
+                if nextCells[cell_x][cell_y] == '#':
+                    nextCells[cell_x][cell_y] = ' '
+                else:
+                    nextCells[cell_x][cell_y] = '#'
+
+        # Check for keyboard input (Enter key press)
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN and not simulation_started:
+                # Start the simulation when the Enter key is pressed
+                can_click_cells = False
+                simulation_started = True
+
 
     # Draw / render
     screen.fill(BG_COLOR)
-
     # Update
-    nextCells = update(nextCells)
+    if simulation_started:
+        nextCells = update(nextCells)
+    draw_grid(nextCells)  # Redraw grid to show user-selected cells
 
     # *after* drawing everything, flip the display
     pygame.display.flip()
